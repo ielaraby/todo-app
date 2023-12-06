@@ -28,6 +28,8 @@ export default function TodoList() {
 	const [dialogTodo, setDialogTodo] = useState(null);
 	const [openUpdate, setOpenUpdate] = useState(false);
 
+	let filteredTodos = allTodos;
+
 	useEffect(() => {
 		const todoStorage = JSON.parse(localStorage.getItem("todos"));
 		setAllTodos(todoStorage);
@@ -88,8 +90,6 @@ export default function TodoList() {
 			return !t.isCompleted;
 		});
 	}, [allTodos]);
-
-	let filteredTodos = allTodos;
 
 	if (displayTodosType == "completed") {
 		filteredTodos = completedTodos;
