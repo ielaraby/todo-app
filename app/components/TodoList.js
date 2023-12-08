@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useContext, useEffect, useMemo, useReducer } from "react";
 import Container from "@mui/material/Container";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -16,23 +16,21 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-import { TodosContext } from "../contexts/TodosContext";
+import todoReducer from "../reducers/todoReducer";
 import Todo from "./Todo";
-import { v4 as uuidv4 } from "uuid";
 
 export default function TodoList() {
 	const [todoTitle, setTodoTitle] = useState("");
-	const { allTodos, setAllTodos } = useContext(TodosContext);
+	const [todos, dispatch] = useReducer(todoReducer, []);
 	const [displayTodosType, setDisplayTodosType] = useState("all");
 	const [open, setOpen] = useState(false);
 	const [dialogTodo, setDialogTodo] = useState(null);
 	const [openUpdate, setOpenUpdate] = useState(false);
 
-	let filteredTodos = allTodos;
+	let filteredTodos = todos;
 
 	useEffect(() => {
-		const todoStorage = JSON.parse(localStorage.getItem("todos"));
-		setAllTodos(todoStorage);
+		dispatch({ type: "get" });
 	}, []);
 
 	function handleTodosTypeChange(e) {
@@ -49,11 +47,7 @@ export default function TodoList() {
 	}
 
 	function handleDelete() {
-		const updatedTodos = allTodos.filter((t) => {
-			return t.id != dialogTodo.id;
-		});
-		setAllTodos(updatedTodos);
-		localStorage.setItem("todos", JSON.stringify(updatedTodos));
+		dispatch({ type: "delete", payload: dialogTodo });
 		setOpen(false);
 	}
 
@@ -67,49 +61,36 @@ export default function TodoList() {
 	};
 
 	function handleUpdate() {
-		const updatedTodos = allTodos.map((t) => {
-			if (t.id == dialogTodo.id) {
-				return { ...t, title: dialogTodo.title, desc: dialogTodo.desc };
-			} else {
-				return t;
-			}
-		});
-		setAllTodos(updatedTodos);
-		localStorage.setItem("todos", JSON.stringify(updatedTodos));
+		dispatch({ type: "update", payload: dialogTodo });
 		setOpenUpdate(false);
 	}
 
+	function handleComplete(todo) {
+		dispatch({ type: "complete", payload: todo });
+	}
+
 	const completedTodos = useMemo(() => {
-		return allTodos.filter((t) => {
+		return todos.filter((t) => {
 			return t.isCompleted;
 		});
-	}, [allTodos]);
+	}, [todos]);
 
 	const notCompletedTodos = useMemo(() => {
-		return allTodos.filter((t) => {
+		return todos.filter((t) => {
 			return !t.isCompleted;
 		});
-	}, [allTodos]);
+	}, [todos]);
 
 	if (displayTodosType == "completed") {
 		filteredTodos = completedTodos;
 	} else if (displayTodosType == "not-completed") {
 		filteredTodos = notCompletedTodos;
 	} else {
-		filteredTodos = allTodos;
+		filteredTodos = todos;
 	}
 
 	function addTodo() {
-		const newTodo = {
-			id: uuidv4(),
-			title: todoTitle,
-			desc: "",
-			isCompleted: false,
-		};
-
-		const newTodos = [...allTodos, newTodo];
-		setAllTodos(newTodos);
-		localStorage.setItem("todos", JSON.stringify(newTodos));
+		dispatch({ type: "add", payload: { newTitle: todoTitle } });
 		setTodoTitle("");
 	}
 
@@ -120,6 +101,7 @@ export default function TodoList() {
 				todo={t}
 				openDelete={openDeleteDialog}
 				openUpdate={handleUpdateOpen}
+				setComplete={handleComplete}
 			/>
 		);
 	});

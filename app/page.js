@@ -49,9 +49,9 @@ export default function Home() {
 					justifyContent: "center",
 				}}
 			>
-				<TodosContext.Provider value={{ allTodos, setAllTodos }}>
-					<TodoList />
-				</TodosContext.Provider>
+				{/* <TodosContext.Provider value={{ allTodos, setAllTodos }}> */}
+				<TodoList />
+				{/* </TodosContext.Provider> */}
 			</div>
 		</themeProvider>
 	);

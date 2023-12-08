@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { useContext } from "react";
-import { TodosContext } from "../contexts/TodosContext";
+import { useReducer } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
@@ -10,22 +8,19 @@ import CheckIcon from "@mui/icons-material/Check";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-export default function Todo({ todo, openDelete, openUpdate }) {
-	const { allTodos, setAllTodos } = useContext(TodosContext);
+import todoReducer from "../reducers/todoReducer";
+
+export default function Todo({ todo, openDelete, openUpdate, setComplete }) {
+	// const [todos, dispatch] = useReducer(todoReducer, []);
 
 	const handleClickOpen = () => {
 		openDelete(todo);
 	};
 
 	function handleComplete() {
-		const updatedTodos = allTodos.map((t) => {
-			if (t.id == todo.id) {
-				t.isCompleted = !t.isCompleted;
-			}
-			return t;
-		});
-		setAllTodos(updatedTodos);
-		localStorage.setItem("todos", JSON.stringify(updatedTodos));
+		// console.log(todo);
+		// dispatch({ type: "complete", payload: todo });
+		setComplete(todo);
 	}
 
 	const handleUpdateOpen = () => {
